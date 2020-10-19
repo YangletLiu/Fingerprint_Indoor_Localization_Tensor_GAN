@@ -2,7 +2,7 @@
 
 # Datasets: 
 
-1. a 20 m × 80 m floor (located in a research institute building)
+1. A 20 m × 80 m floor (located in a research institute building)
 
 There are 21 randomly deployed APs. 
 
