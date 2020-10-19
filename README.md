@@ -8,4 +8,12 @@
 
 There are 21 randomly deployed APs. 
 
-Fingerprints are sampled at grid size: 0.3m x 0.3m, resulting in a fingerprint tensor: 64 x 
+Fingerprints are sampled at grid size: 0.3m x 0.3m, resulting in a fingerprint tensor: 64 x 256 x 21
+
+# MATLAB codes
+
+  We used MATLAB for kNN and direct neural networks
+ 
+1. kNN_performance
+
+2. direct neural networks
