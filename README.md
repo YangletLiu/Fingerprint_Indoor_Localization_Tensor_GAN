@@ -1,6 +1,6 @@
 # Fingerprint_Indoor_Localization_Tensor_GAN
   
-  X.-Y. Liu, X. Wang. Real-time indoor localization for smartphones using tensor-generative adversarial nets. IEEE Transactions on Neural Networks and Learning Systems, 2020.
+  This repository contains the MATLAB code for the paper Real-time indoor localization for smartphones using tensor-generative adversarial nets. IEEE Transactions on Neural Networks and Learning Systems, 2020, X.-Y. Liu, X. Wang.
 
 # Datasets: 
 
