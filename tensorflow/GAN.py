@@ -7,6 +7,7 @@
 
 # run GAN.py to train a generative model which is used to generate low-quality tensors with size 14 * 14 * 7 from a random distribution.
 
+
 import numpy as np
 import os
 import tensorflow as tf
@@ -17,19 +18,24 @@ from skimage import transform
 learning_rate = 1e-3
 LAMBDA = 10
 
+
 def lrelu(x, alpha=0.2):
     return tf.maximum(alpha * x, x)
+
 
 def relu(x):
     return tf.nn.relu(x)
 
+
 def elu(x):
     return tf.nn.elu(x)
+
 
 def xavier_init(size):
     input_dim = size[0]
     stddev = 1. / tf.sqrt(input_dim / 2.)
     return tf.random_normal(shape=size, stddev=stddev)
+
 
 def he_init(size, stride):
     input_dim = size[2]
@@ -42,6 +48,7 @@ def he_init(size, stride):
     minval = -stddev * np.sqrt(3)
     maxval = stddev * np.sqrt(3)
     return tf.random_uniform(shape=size, minval=minval, maxval=maxval)
+
 
 class Network(object):
     def __init__(self):
@@ -113,6 +120,8 @@ class Network(object):
         return output
 
     def batch_norm(self, input, scale=False):
+        ''' batch normalization
+        ArXiv 1502.03167v3 '''
         with tf.variable_scope('batch_norm' + str(self.layer_num)):
             output = tf.contrib.layers.batch_norm(input, scale=scale)
             self.layer_num += 1
@@ -380,6 +389,7 @@ if __name__ == '__main__':
             gs = sess.run(g.g, feed_dict={g.z:zs})
             show_result(gs[0], gs[1], gs[2])
             print('step: {}, D_loss: {}, G_loss:{}'.format(step, dloss, gloss))
+
 
 
 
