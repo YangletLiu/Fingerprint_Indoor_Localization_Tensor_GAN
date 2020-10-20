@@ -8,7 +8,7 @@
 
 There are in total 30 randomly deployed APs;  fingerprints are sampled at grid size: 0.3m x 0.3m.
 
-On the fourthe floor, it can receive 21 APs, an orginal 63 x 268 x 21 tensor was collected.
+On the fourthe floor, it can receive 21 APs, and an orginal 63 x 268 x 21 tensor was collected.
 
 We preprocess it into a fingerprint tensor: 64 x 256 x 21 (copied the 63th row to a 64th row; deleted the 257th to 268th columns).
 
