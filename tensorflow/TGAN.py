@@ -1,15 +1,10 @@
-# ---------------------------------------------------------
-# Tensorflow Vanilla GAN Implementation
-# Licensed under The MIT License [see LICENSE for details]
-# Written by Cheng-Bin Jin
-# Email: sbkim0407@gmail.com
-# ---------------------------------------------------------
+# Tensorflow 
 
 import collections
 import numpy as np
 import tensorflow as tf
 import matplotlib as mpl
-mpl.use('TkAgg')  # or whatever other backend that you want to solve Segmentation fault (core dumped)
+# mpl.use('TkAgg')  # or whatever other backend that you want to solve Segmentation fault (core dumped)
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from tensorflow.contrib.layers import flatten
@@ -17,27 +12,28 @@ from tensorflow.contrib.layers import flatten
 import tensorflow_utils as tf_utils
 import utils as utils
 
+# size = 21
 
-class VanillaGAN(object):
-    def __init__(self, sess, flags, image_size):
+class GAN(object):
+    def __init__(self, sess, flags, size):
         self.sess = sess
         self.flags = flags
-        self.image_size = image_size
-        self.num_hiddens = [128, 256]
-        self.out_func = tf.nn.tanh if self.flags.dataset == 'cifar10' else tf.nn.sigmoid
+        self.size = size
+        self.num_hiddens = [32, 64]
+        self.out_func = tf.nn.tanh if self.flags.dataset == 'tensor' else tf.nn.sigmoid
 
         self._build_net()
         self._tensorboard()
 
-        print('Initialized Vanilla GAN SUCCESS!')
+        print('Initialization SUCCESS!')
 
     def _build_net(self, is_train=True):
         if is_train:
             self.z = tf.placeholder(tf.float32, shape=[None, self.flags.z_dim])
-            self.y_imgs = tf.placeholder(tf.float32, shape=[None, *self.image_size])
+            self.y_imgs = tf.placeholder(tf.float32, shape=[None, *self.size])
 
-            # converting cifar10 dataset to [-1., 1.]
-            if self.flags.dataset == 'cifar10':
+            # converting values to [-1., 1.]
+            if self.flags.dataset == 'tensor':
                 self.y_imgs = 2. * self.y_imgs - 1.
 
             self.g_samples = self.generator(self.z)
