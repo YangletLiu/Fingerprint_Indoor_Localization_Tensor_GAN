@@ -17,8 +17,14 @@ Fingerprints are sampled at grid size: 0.3m x 0.3m, resulting in a fingerprint t
   We used MATLAB for kNN and Direct neural networks
  
 1. kNN_performance implements the kNN algorithm
+    
+   Test_kNN_Plot.m tested the localization performance and dras CDF curve of localization error.
 
 2. Direct neural networks (it split the data into training set and testing set, we also include the data in the MATLAB folder).
+   
+   We used the matlab deep learning toolbox at: https://www.mathworks.com/products/deep-learning.html
+   
+   the file RF_regression_net.m is saved from this toolbox, for a reference.
 
 
 # Python Codes for GAN (regressor and discriminator)
