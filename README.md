@@ -50,3 +50,5 @@ A code to implement the original GAN.py with a generator and a discriminator. Te
     show results: draw_pic.py
 
 A code for a TGAN.py with a regressor and a discriminator.
+
+As last, there are few python codes for kNN and neural networks (not tuned).
