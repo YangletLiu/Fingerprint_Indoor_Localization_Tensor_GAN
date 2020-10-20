@@ -1,13 +1,22 @@
 # Tensorflow 
 
+import numpy as np
 import sys, os
+import tensorflow as tf
+import matplotlib.pyplot as plt
+from skimage import transform
+
 if os.getcwd().endswith("Tensorflow TGAN"):
     root_dir = os.getcwd()
 else:
     root_dir = os.path.dirname(os.getcwd())
 sys.path.append(root_dir)
-import tensorflow as tf
+
 from Model import model_base
+
+
+learning_rate = 1e-3
+LAMBDA = 10
 
 class TGAN(model_base.NN_Base):
     def __init__(self, config):
