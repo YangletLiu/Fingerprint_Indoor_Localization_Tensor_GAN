@@ -1,6 +1,6 @@
 # Fingerprint_Indoor_Localization_Tensor_GAN
   
-  This repository contains the Python and MATLAB codes for the paper **Real-time indoor localization for smartphones using tensor-generative adversarial nets. IEEE Transactions on Neural Networks and Learning Systems**, 2020, by X.-Y. Liu and X. Wang. [https://ieeexplore.ieee.org/document/9159909]]
+  This repository contains the Python and MATLAB codes for the paper **Real-time indoor localization for smartphones using tensor-generative adversarial nets. IEEE Transactions on Neural Networks and Learning Systems**, 2020, by X.-Y. Liu and X. Wang. [https://ieeexplore.ieee.org/document/9159909]
   
 
 # Datasets: 
