@@ -1,6 +1,8 @@
-## A test of GAN: 
+## A test of GAN on MINIST dataset.
 # Goodfellow, I., Pouget-Abadie, J., Mirza, M., Xu, B., Warde-Farley, D., Ozair, S., Courville, A. and Bengio, Y., 2014. 
 # Generative adversarial nets. In Advances in neural information processing systems (pp. 2672-2680).
+
+# run GAN.py to train a generative model which is used to generate low-quality tensors with size 14 * 14 * 7 from a random distribution.
 
 import numpy as np
 import os
