@@ -51,4 +51,4 @@ A code to implement the original GAN.py with a generator and a discriminator. Te
 
 A code for a TGAN.py with a regressor and a discriminator.
 
-As last, I tested few python codes for kNN and neural networks (not tuned).
+As last, I tested few python codes for kNN and direct neural networks (not tuned).
