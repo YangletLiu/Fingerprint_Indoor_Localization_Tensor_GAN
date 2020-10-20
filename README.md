@@ -37,6 +37,9 @@ We preprocess it into a fingerprint tensor: 64 x 256 x 21 (copied the 63th row t
 > pillow 5.0.0
 > pickle 0.7.4
 
-A code to implement the original GAN.py with a generator and a discriminator, tested at link: https://github.com/hust512/Tensor-GAN
+A code to implement the original GAN.py with a generator and a discriminator. Testing on the mnist data.
+    run GAN.py to train a generative model which is used to generate image data from a random distribution.
+    test data gen: gen_test_data.py
+    show results: draw_pic.py
 
 A code for a TGAN.py with a regressor and a discriminator.
