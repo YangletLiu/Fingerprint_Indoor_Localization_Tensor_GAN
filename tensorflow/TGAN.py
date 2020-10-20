@@ -14,14 +14,40 @@ sys.path.append(root_dir)
 
 from Model import model_base
 
-
 learning_rate = 1e-3
 LAMBDA = 10
 
-class TGAN(model_base.NN_Base):
-    def __init__(self, config):
-        super(TGAN, self).__init__(config.BATCH_NORM_DECAY, config.BATCH_NORM_EPSILON)
-        self.config = config
+def lrelu(x, alpha=0.2):
+    return tf.maximum(alpha * x, x)
+
+def relu(x):
+    return tf.nn.relu(x)
+
+def elu(x):
+    return tf.nn.elu(x)
+
+def xavier_init(size):
+    input_dim = size[0]
+    stddev = 1. / tf.sqrt(input_dim / 2.)
+    return tf.random_normal(shape=size, stddev=stddev)
+
+def he_init(size, stride):
+    input_dim = size[2]
+    output_dim = size[3]
+    filter_size = size[0]
+
+    fan_in = input_dim * filter_size ** 2
+    fan_out = output_dim * filter_size ** 2 / (stride ** 2)
+    stddev = tf.sqrt(4. / (fan_in + fan_out))
+    minval = -stddev * np.sqrt(3)
+    maxval = stddev * np.sqrt(3)
+    return tf.random_uniform(shape=size, minval=minval, maxval=maxval)
+
+class TGAN(model_base.NN_Base):        
+    def __init__(self):
+        self.layer_num = 0
+        self.weights = []
+        self.biases = []
 
     # Define the discriminator   
     def discriminator(self, tensor, y, reuse = False):
