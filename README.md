@@ -32,6 +32,8 @@ We preprocess it into a fingerprint tensor: 64 x 256 x 21 (copied the 63th row t
    It is a regressor, and we used the matlab deep learning toolbox with GUI, at link: https://www.mathworks.com/products/deep-learning.html
    
    The file RF_regression_net.m is saved from this toolbox, for a reference.
+  
+3. For tensor compleiton, we worked on MATLAB and put it into a saparate folder.
 
 
 # Python Codes for GAN (regressor and discriminator)
