@@ -16,7 +16,7 @@ Fingerprints are sampled at grid size: 0.3m x 0.3m, resulting in a fingerprint t
 
   We used MATLAB for kNN and Direct neural networks
  
-1. kNN_performance
+1. kNN_performance implements the kNN algorithm
 
 2. Direct neural networks (it split the data into training set and testing set, we also include the data in the MATLAB folder).
 
