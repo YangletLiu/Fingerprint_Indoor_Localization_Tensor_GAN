@@ -6,6 +6,8 @@
 # Time: 2018/10/22 10:41
 
 # run GAN.py to train a generative model which is used to generate low-quality tensors with size 14 * 14 * 7 from a random distribution.
+# test data gen: https://github.com/hust512/Tensor-GAN/blob/master/TGAN/gen_test_data.py
+# show results: https://github.com/hust512/Tensor-GAN/blob/master/TGAN/draw_pic.py
 
 
 import numpy as np
