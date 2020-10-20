@@ -2,6 +2,9 @@
 # Goodfellow, I., Pouget-Abadie, J., Mirza, M., Xu, B., Warde-Farley, D., Ozair, S., Courville, A. and Bengio, Y., 2014. 
 # Generative adversarial nets. In Advances in neural information processing systems (pp. 2672-2680).
 
+# Author: YIN MIAO at link: https://github.com/hust512/Tensor-GAN
+# Time: 2018/10/22 10:41
+
 # run GAN.py to train a generative model which is used to generate low-quality tensors with size 14 * 14 * 7 from a random distribution.
 
 import numpy as np
