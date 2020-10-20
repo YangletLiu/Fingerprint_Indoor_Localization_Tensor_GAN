@@ -236,13 +236,13 @@ class TGAN(object):
         h = lrelu(G.dense(x, np.prod((4, 4, 256))))
         # h = tf.reshape(h, (tf.shape(h)[0], self.T_shape[0], self.T_shape[1], 64))
         h = tf.reshape(h, (tf.shape(h)[0], 4, 4, 256))
-        h = lrelu(G.deconv2d(h, 128, 5, 2))
+        h = lrelu(G.deconv2d(h, 128, 1, 1))
         h = h[:,:7,:7,:]
-        h = lrelu(G.deconv2d(h, 64, 5, 2))
+        h = lrelu(G.deconv2d(h, 64, 1, 1))
 
         # h = G.residual_block(h, 64, 3, 2)
 
-        h = G.deconv2d(h, self.T_shape[2], 3, 1)
+        h = G.deconv2d(h, self.T_shape[2], 1, 1)   # Use 1 x 1 kernel and stride 1
         h = tf.nn.sigmoid(h)
 
         self.G_params = G.weights + G.biases
