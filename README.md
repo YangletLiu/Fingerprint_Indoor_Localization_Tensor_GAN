@@ -37,6 +37,6 @@ We preprocess it into a fingerprint tensor: 64 x 256 x 21 (copied the 63th row t
 > pillow 5.0.0
 > pickle 0.7.4
 
-A code for the original GAN.py with a generator and a discriminator.
+A code for the original GAN.py with a generator and a discriminator, tested at link: https://github.com/hust512/Tensor-GAN
 
 A code for a TGAN.py with a regressor and a discriminator.
