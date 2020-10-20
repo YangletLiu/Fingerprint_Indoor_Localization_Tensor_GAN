@@ -1,3 +1,7 @@
+## A test of GAN: 
+# Goodfellow, I., Pouget-Abadie, J., Mirza, M., Xu, B., Warde-Farley, D., Ozair, S., Courville, A. and Bengio, Y., 2014. 
+# Generative adversarial nets. In Advances in neural information processing systems (pp. 2672-2680).
+
 import numpy as np
 import os
 import tensorflow as tf
