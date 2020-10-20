@@ -1,6 +1,6 @@
 %% kNN Aprroach 
 
-% By Yanglet, June 2014
+% By Yanglet
 % Reference papers:
 %      [1] Bahl P, Padmanabhan V N. RADAR: An in-building RF-based user location and tracking system. INFOCOM 2000. (citation: 6266)
 
@@ -22,7 +22,7 @@ m = size(True_Tensor,1);
 n = size(True_Tensor,2);
 AP_num = size(True_Tensor,3);
 
-num_points = 200; % num of random generated points, which we use to test localization performance
+num_points = 200; % or other numbers; % num of testing points, which we use to test localization performance
 
 %% Generate num_points points with uniform random positions
 % positions (An indicator matrix of same size, indicating where the testing points locate)
@@ -42,23 +42,23 @@ end
 % get the measurement at num_points points from the True_Tensor = X
 % noise can be added to model measurement noise
 % points_RSS
-points_RSS = ones(m,n,AP_num) * (-100);
+points_RSS = ones(m,n,AP_num) * (-100);  % ground is -100 dB here.
 temp_RSS=[];
 for no = 1:AP_num
     temp_X = X(:,(no-1)*n+1:no*n);
-    % some noise can be added later;
+    % some noise can be added to model measurement noise;
     temp_RSS = temp_X .* positions + (ones(m,n) * (-100)) .* (ones(m,n) - positions);
-    % mind the ground is -100.
+    % remember the ground is -100.
     points_RSS(:,:,no) = temp_RSS;
 end
 
-% here, we use points_RSS to perform localization
+% here, we use points_RSS to test localization
 
-error_opt = zeros(1,num_points);
+%error_opt = zeros(1,num_points);
 error_opt = zeros(1,num_points);
 error_recovered = zeros(1,num_points);
 
-distance_opt = ones(m,n) * 5000;
+distance_opt = ones(m,n) * 5000; % a large value
 distance = ones(m,n) * 5000;
 
 RSS_dif__opt = zeros(m,n,AP_num);
