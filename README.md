@@ -13,7 +13,11 @@ On the fourthe floor, it can receive 21 APs, and an orginal 63 x 268 x 21 tensor
 
 We preprocess it into a fingerprint tensor: 64 x 256 x 21 (copied the 63th row to a 64th row; deleted the 257th to 268th columns).
 
-2. We also include a synthetic fingerprint dataset of size: 476 x 598 x 15, used in a previous project: **Adaptive sampling of RF fingerprints for fine-grained indoor localization. IEEE Transactions on Mobile Computing, 2016. By X.-Y. Liu, S. Aeron, V. Aggarwal, X. Wang, M.-Y. Wu.**
+2. A real-dataset: WiFidata_real.mat collected for our Smartphone App.
+ 
+   size: 6 x 16 x 14; and sample grid size 0.1m x 0.1m.
+
+3. We also include a synthetic fingerprint dataset of size: 476 x 598 x 15, used in a previous project: **Adaptive sampling of RF fingerprints for fine-grained indoor localization. IEEE Transactions on Mobile Computing, 2016. By X.-Y. Liu, S. Aeron, V. Aggarwal, X. Wang, M.-Y. Wu.**
 
 # MATLAB codes for kNN and Direct Neural Networks
 
