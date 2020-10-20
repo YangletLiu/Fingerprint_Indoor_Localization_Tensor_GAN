@@ -29,7 +29,7 @@ Fingerprints are sampled at grid size: 0.3m x 0.3m, resulting in a fingerprint t
 
 # Python Codes for GAN (regressor and discriminator)
 > tensorflow 1.8.0
-python 3.5.3
-numpy 1.14.2
-pillow 5.0.0
-pickle 0.7.4
+> python 3.5.3
+> numpy 1.14.2
+> pillow 5.0.0
+> pickle 0.7.4
