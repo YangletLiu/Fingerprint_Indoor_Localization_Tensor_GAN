@@ -39,7 +39,7 @@ We preprocess it into a fingerprint tensor: 64 x 256 x 21 (copied the 63th row t
 
 A code to implement the original GAN.py with a generator and a discriminator. Testing on the mnist data.
 
-    run GAN.py to train a generative model which is used to generate image data from a random distribution.
+    run GAN.py to train a generative model which is used to generate image data from a random distribution
     
     test data gen: gen_test_data.py
     
