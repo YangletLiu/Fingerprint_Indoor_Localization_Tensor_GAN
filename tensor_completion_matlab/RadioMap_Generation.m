@@ -1,4 +1,5 @@
 %% Synthesis a radio map
+% This file is a simple synthetic model.
 function [Radio_map]=RadioMap_Generation(m,n,AP_position)
 % physical size: m x n
 % AP_position: %% a m x n matrix with few ones indicating APs' positions
