@@ -43,94 +43,213 @@ def he_init(size, stride):
     maxval = stddev * np.sqrt(3)
     return tf.random_uniform(shape=size, minval=minval, maxval=maxval)
 
-class TGAN(model_base.NN_Base):        
+class Network(object):
     def __init__(self):
         self.layer_num = 0
         self.weights = []
         self.biases = []
+        
+    def dense(self, input, output_dim):
+        with tf.variable_scope('dense' + str(self.layer_num)):
+            input_dim = input.get_shape().as_list()[1]
 
-    # Define the discriminator   
-    def discriminator(self, tensor, y, reuse = False):
-        with tf.variable_scope("discriminator") as scope:
-            if reuse:
-                scope.reuse_variables()
-            if self.config.DATA_NAME == "rf_tensor":
-                image = tf.reshape(tensor, [-1, 21])
-                image = self._add_noise(tensor, stddev=0.2)
-                image = tf.concat([tensor, y], 1)
+            init_w = xavier_init([input_dim, output_dim])
+            weight = tf.get_variable('weight', initializer=init_w)
 
-                h0 = self._WN_dense(tensor, 1000, 'd_h0_wndense0', init = False)
-                h0 = tf.nn.leaky_relu(h0)
-                h0 = self._add_noise(h0, stddev=0.2)
-                h0 = tf.concat([h0, y], 1)
+            init_b = tf.zeros([output_dim])
+            bias = tf.get_variable('bias', initializer=init_b)
 
-                h1 = self._WN_dense(h0, 500, 'd_h1_wndense0', init=False)
-                h1 = tf.nn.leaky_relu(h1)
-                h1 = self._add_noise(h1, stddev=0.2)
-                h1 = tf.concat([h1, y], 1)
+            output = tf.add(tf.matmul(input, weight), bias)
 
-                h3 = self._WN_dense(h4, 1, 'd_h5_wndense0', init=False)
-                return tf.nn.sigmoid(h5), h5
+            self.layer_num += 1
+            self.weights.append(weight)
+            self.biases.append(bias)
+
+        return output
+    
+    def conv2d(self, input, input_dim, output_dim, filter_size, stride, padding='SAME'):
+        with tf.variable_scope('conv' + str(self.layer_num)):
+            init_w = he_init([filter_size, filter_size, input_dim, output_dim], stride)
+            weight = tf.get_variable(
+                'weight',
+                initializer=init_w
+            )
+
+            init_b = tf.zeros([output_dim])
+            bias = tf.get_variable(
+                'bias',
+                initializer=init_b
+            )
+
+            output = tf.add(tf.nn.conv2d(
+                input,
+                weight,
+                strides=[1, stride, stride, 1],
+                padding=padding
+            ), bias)
+
+            self.layer_num += 1
+            self.weights.append(weight)
+            self.biases.append(bias)
+
+        return output
+
+    def deconv2d(self, input, output_dim, filter_size, stride, padding='SAME'):
+        with tf.variable_scope('deconv' + str(self.layer_num)):
+            input_shape = input.get_shape().as_list()
+            init_w = he_init([filter_size, filter_size, output_dim, input_shape[3]], stride)
+            weight = tf.get_variable(
+                'weight',
+                initializer=init_w
+            )
+
+            init_b = tf.zeros([output_dim])
+            bias = tf.get_variable(
+                'bias',
+                initializer=init_b
+            )
+
+            output = tf.add(tf.nn.conv2d_transpose(
+                value=input,
+                filter=weight,
+                output_shape=[
+                    tf.shape(input)[0],
+                    input_shape[1] * stride,
+                    input_shape[2] * stride,
+                    output_dim
+                ],
+                strides=[1, stride, stride, 1],
+                padding=padding
+            ), bias)
+            output = tf.reshape(output,
+                                [tf.shape(input)[0], input_shape[1] * stride, input_shape[2] * stride, output_dim])
+
+            self.layer_num += 1
+            self.weights.append(weight)
+            self.biases.append(bias)
+
+        return output
+    
+    def batch_norm(self, input, scale=False):
+        ''' batch normalization
+        ArXiv 1502.03167v3 '''
+        with tf.variable_scope('batch_norm' + str(self.layer_num)):
+            output = tf.contrib.layers.batch_norm(input, scale=scale)
+            self.layer_num += 1
+
+        return output
+    
+class TGAN(object):
+    def __init__(self, T_shape, latent_dim):
+        self.T_shape = T_shape
+        self.latent_dim = latent_dim
+        # self.learning_rate = learning_rate
+        # self.vgg = VGG19(None, None, None)
+
+        self.G_params = []
+        self.D_params = []
+        
+        self.y = tf.placeholder(
+            tf.float32,
+            [None, self.T_shape[0]*2, self.T_shape[1]*2, self.T_shape[2]],
+            name='x'
+        )
+        self.z = tf.placeholder(tf.float32, [None, self.latent_dim], name='z')
+        self.x = self.downscale(self.y, 2)
+
+        with tf.variable_scope('generator'):
+            self.g = self.generator(self.z)
+        with tf.variable_scope('discriminator') as scope:
+            self.D_real = self.discriminator(self.x)
+            scope.reuse_variables()
+            self.D_fake = self.discriminator(self.g)
+
+        disc_loss = -tf.reduce_mean(self.D_real) + tf.reduce_mean(self.D_fake)
+        gen_loss = -tf.reduce_mean(self.D_fake)
+
+        alpha = tf.random_uniform(
+            # shape=[self.batch_size, 1],
+            shape=(tf.shape(self.y)[0], 1),
+            minval=0.,
+            maxval=1.
+        )
+
+        x_ = tf.reshape(self.x, [-1, np.prod(self.T_shape)])
+        g_ = tf.reshape(self.g, [-1, np.prod(self.T_shape)])
+
+        differences = x_ - g_
+        interpolates = x_ + alpha * differences
+        interpolates = tf.reshape(interpolates, (-1, self.T_shape[0], self.T_shape[1], self.T_shape[2]))
+        gradients = tf.gradients(self.discriminator(interpolates), [interpolates])[0]
+        slopes = tf.sqrt(tf.reduce_sum(tf.square(gradients), reduction_indices=[1]))
+        gradient_penalty = tf.reduce_mean((slopes - 1.) ** 2)
+
+        self.D_loss = disc_loss + LAMBDA * gradient_penalty
+        # self.G_loss = content_loss + self.SIGMA * gen_loss
+        self.G_loss = gen_loss
+
+        self.D_opt = tf.train.AdamOptimizer(
+            learning_rate=learning_rate,
+            beta1=0.5,
+            beta2=0.9
+        ).minimize(self.D_loss, var_list=self.D_params)
+        self.G_opt = tf.train.AdamOptimizer(
+            learning_rate=learning_rate,
+            beta1=0.5,
+            beta2=0.9
+        ).minimize(self.G_loss, var_list=self.G_params)
+                
             
-             else:
-                raise ValueError("The specified dataset is not yet implemented!")
+     def discriminator(self, x):
+        D = Network()
+        # Network.conv2d(input, output_dim, filter_size, stride, padding='SAME')
+        h = D.dense(x, self.T_shape[2], 32, 1, 1). # Use 1 x 1 kernel and stride 1 
+        h = lrelu(h)
+
+        # h = D.conv2d(h, 64, 64, 3, 1)
+        # h = lrelu(h)
+        # h = D.batch_norm(h)
+
+        map_nums = [32, 64]
+
+        for i in range(len(map_nums) - 1):
+            h = D.conv2d(h, map_nums[i], map_nums[i + 1], 1, 1)  # Use 1 x 1 kernel and stride 1 
+            h = lrelu(h)
+            h = D.batch_norm(h)
+
+        h_shape = h.get_shape().as_list()
+        h = tf.reshape(h, [-1, h_shape[1] * h_shape[2] * h_shape[3]])
+        h = D.dense(h, 1024)
+        h = lrelu(h)
+
+        h = D.dense(h, 1)
+
+        self.D_params = D.weights + D.biases
+
+        return h
 
 
-    def regressor(self, tensor, train_ph, reuse = False):
-        with tf.variable_scope("Regressor") as scope:
-            if reuse:
-                scope.reuse_variables()
-            if self.config.DATA_NAME == "mnist":
-                image = tf.reshape(image, [-1, 28, 28, 1])
-                image = self._add_noise(image, stddev=0.3)
+    def regressor(self, x):
+        G = Network()
+        # Network.deconv2d(input, input_shape, output_dim, filter_size, stride)
+        # h = G.dense(z, np.prod((self.T_shape[0], self.T_shape[1], 64)))
+        h = lrelu(G.dense(x, np.prod((4, 4, 256))))
+        # h = tf.reshape(h, (tf.shape(h)[0], self.T_shape[0], self.T_shape[1], 64))
+        h = tf.reshape(h, (tf.shape(h)[0], 4, 4, 256))
+        h = lrelu(G.deconv2d(h, 128, 5, 2))
+        h = h[:,:7,:7,:]
+        h = lrelu(G.deconv2d(h, 64, 5, 2))
 
-                h0 = self._conv2d(image, 32, k_h=3, k_w=3, d_h=1, d_w=1, name='c_h0_conv0')
-                h0 = tf.nn.leaky_relu(h0)
-                h0 = self._batch_norm_contrib(h0, name='c_h0_bn0', train=train_ph)
-                h0 = tf.layers.max_pooling2d(h0, 2, 2)
-                h0 = self._drop_out(h0, 0.5, train_ph)
+        # h = G.residual_block(h, 64, 3, 2)
 
-                h1 = self._conv2d(h0, 64, k_h=3, k_w=3, d_h=1, d_w=1, name='c_h1_conv0')
-                h1 = tf.nn.leaky_relu(h1)
-                h1 = self._batch_norm_contrib(h1, name='c_h1_bn0', train=train_ph)
+        h = G.deconv2d(h, self.T_shape[2], 3, 1)
+        h = tf.nn.sigmoid(h)
 
-                h1 = self._conv2d(h1, 64, k_h=3, k_w=3, d_h=1, d_w=1, name='c_h1_conv1')
-                h1 = tf.nn.leaky_relu(h1)
-                h1 = self._batch_norm_contrib(h1, name='c_h1_bn1', train=train_ph)
-                h1 = tf.layers.max_pooling2d(h1, 2, 2)
-                h1 = self._drop_out(h1, 0.5, train_ph)
+        self.G_params = G.weights + G.biases
 
-                h2 = tf.reduce_mean(h2, axis=[1, 2])  # Global pooling
-                fm = h2
-                h2 = self._linear_fc(h2, self.config.NUM_CLASSES, 'c_h2_lin')
-                h2 = self._batch_norm_contrib(h2, name='c_h3_bn0', train=train_ph)
-                return h2, fm
+        return h
 
-            else:
-                raise ValueError("The specified dataset is not yet implemented!")
 
-    def sampler(self, z, y, reuse = True):
-        with tf.variable_scope("good_generator", reuse = reuse):
-            if self.config.DATA_NAME == "rf_tensor":
-                z = tf.concat([z, y], 1)
-                z = self._linear_fc(z, 500, 'gg_h0_lin')
-                h0 = tf.nn.softplus(z, 'gg_sp0')
-                h0 = self._batch_norm_contrib(h0, 'gg_bn0', train=True)
-
-                h1 = tf.concat([h0, y], 1)
-                h1 = self._linear_fc(h1, 500, 'gg_h1_lin')
-                h1 = tf.nn.softplus(h1, 'gg_sp1')
-                h1 = self._batch_norm_contrib(h1, 'gg_bn1', train=True)
-
-                h2 = tf.concat([h1, y], 1)
-                h2 = self._WN_dense(h2, 28 * 28, 'gg_h2_lin')
-                h2 = tf.nn.sigmoid(h2, 'gg_sp1')
-                return h2     
-
-            elif self.config.DATA_NAME == "prostate":
-                return
-            else:
-                raise ValueError("The specified dataset is not yet implemented!")
 
     def forward_pass(self, z_g, y_g, x_l_c, y_l_c, x_l_d, y_l_d, x_u_d, x_u_c, train):
         
@@ -177,29 +296,55 @@ class TGAN(model_base.NN_Base):
         return G, D
 
 if __name__ == "__main__":
-    from config import Config
+        
+    batch_size = 32 #64
+    step_num = 5000 #3000
+    latent_dim = 64 #128
+    
+    #from tensorflow.examples.tutorials.mnist import input_data
+    
+    # Load mat file, refer: https://docs.scipy.org/doc/scipy/reference/generated/scipy.io.loadmat.html
+    from os.path import dirname, join as pjoin
+    import scipy.io as sio
+    
+    data_dir = pjoin(dirname(sio.__file__), 'matlab', 'tests', 'data'). # check your own path
+    mat_fname = pjoin(data_dir, 'tensor.mat')
+    
+    tensor = sio.loadmat(mat_fname)
+    
+    g = GAN([21, 1, 1], latent_dim)
+    
+    if not os.path.exists('./backup/'):
+        os.mkdir('./backup/')
+    if not os.path.exists('./out/'):
+        os.mkdir('./out/')
 
-    class TempConfig(Config):
-        DATA_NAME = "rf_tensor"
-        BATCH_SIZE = 64
-        NUM_CLASSES = 10
-        MINIBATCH_DIS = False
+    sess = tf.Session()
+    init = tf.global_variables_initializer()
+    sess.run(init)
+    saver = tf.train.Saver()
 
+    if tf.train.get_checkpoint_state('./backup/'):
+        saver.restore(sess, './backup/')
+        print('********Restore the latest trained parameters.********')
 
-    tmpconfig = TempConfig()
+    for step in range(step_num):
+        for _ in range(5):
+            xs, _ = data.train.next_batch(batch_size)
+            xs = np.reshape(xs, (-1, 21, 1, 1))  # Use 1 x 1 kernel and stride 1 
+            zs = np.random.uniform(size=[batch_size, latent_dim])
+            # xs = np.expand_dims(xs, axis=-1) 
+            _, dloss = sess.run([g.D_opt, g.D_loss], feed_dict={g.z:zs, g.y:xs})
 
-    tf.reset_default_graph()
+        zs = np.random.uniform(size=[batch_size, latent_dim])
+        xs, _ = data.train.next_batch(batch_size)
+        xs = np.reshape(xs, (-1, 21, 1, 1))   # Use 1 x 1 kernel and stride 1 
+        # xs = np.expand_dims(xs, axis=-1)
+        _, gloss = sess.run([g.G_opt, g.G_loss], feed_dict={g.z:zs, g.y:xs})
 
-    tensor = tf.ones((64, 32, 32, 3))
-    y = tf.ones((64, 10))
-    z = tf.ones((64, 21))
-    model = TGAN(tmpconfig)
-
-    h = model.good_generator(z, y)
-
-
-    with tf.Session() as sess:
-        sess.run(tf.global_variables_initializer())
-        h_o = sess.run(h)
-
-    print(h_o.shape)
+        if step % 100 == 0:  #output every 100 steps
+            saver.save(sess, './backup/', write_meta_graph=False)
+            zs = np.random.uniform(size=[3, latent_dim])
+            gs = sess.run(g.g, feed_dict={g.z:zs})
+            show_result(gs[0], gs[1], gs[2])
+            print('step: {}, D_loss: {}, G_loss:{}'.format(step, dloss, gloss))
