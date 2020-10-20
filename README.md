@@ -22,9 +22,9 @@ Fingerprints are sampled at grid size: 0.3m x 0.3m, resulting in a fingerprint t
 
 2. Direct neural networks (it split the data into training set and testing set, we also include the data in the MATLAB folder).
    
-   We used the matlab deep learning toolbox at: https://www.mathworks.com/products/deep-learning.html
+   It is a regressor, and we used the matlab deep learning toolbox with GUI, at link: https://www.mathworks.com/products/deep-learning.html
    
-   the file RF_regression_net.m is saved from this toolbox, for a reference.
+   The file RF_regression_net.m is saved from this toolbox, for a reference.
 
 
 # Python Codes for GAN (regressor and discriminator)
